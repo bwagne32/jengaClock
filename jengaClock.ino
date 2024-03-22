@@ -2,9 +2,16 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <WiFi.h> // for WiFi shield or ESP32
 #include "NTP.h"
+#include <vector>
 
 #include "numbers.h"
 #include "login.h"
+
+#define core0 0
+#define core1 1
+
+using numbers_h::convertStates;
+using numbers_h::output;
 
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwmBoard1 = Adafruit_PWMServoDriver(0x40); // Digits 1 and 2 (hours)
@@ -19,6 +26,11 @@ Adafruit_PWMServoDriver pwmBoard2 = Adafruit_PWMServoDriver(0x41); // Digits 3 a
 
 WiFiUDP wifiUdp;
 NTP ntp(wifiUdp);
+
+
+// Seconds display
+const uint8_t led1Pin = 5;
+const uint8_t led2Pin = 6;
 
 
 void setup(){
@@ -47,6 +59,11 @@ void setup(){
 
   Wire.setClock(200000);
 
+  // LEDS
+  pinMode(led1Pin, OUTPUT);
+  pinMode(led2Pin, OUTPUT);
+
+  xTaskCreatePinnedToCore(displaySeconds, "show seconds", 2048, nullptr, 2, NULL, core0);
 }
 
 /* Example
@@ -57,5 +74,22 @@ void setup(){
 
 void loop(){
   ntp.update();
-  
+  //Serial.println(ntp.formattedTime("%A %T")); // debugging
+  output(pwmBoard2, 6, 12, convertStates(ntp.minutes() % 10)); // segment 4
+  output(pwmBoard2, 0, 11, convertStates(ntp.minutes() / 10)); // segment 3
+  output(pwmBoard1, 6, 12, convertStates(ntp.hours() % 12 % 10)); // segment 2  
+  output(pwmBoard2, 0, 11, convertStates((ntp.hours() < 10) ? -1 : 1)); // segment 1
+  //Serial.println((ntp.hours() < 10) ? -1 : 1); // debugging
+  delay(500);
+}
+
+void displaySeconds(void *pvParameters){
+  while(true){
+    digitalWrite(led1Pin, HIGH);
+    digitalWrite(led2Pin, LOW);
+    delay(1000);
+    digitalWrite(led1Pin, LOW);
+    digitalWrite(led2Pin, HIGH);
+    delay(1000);
+  }
 }

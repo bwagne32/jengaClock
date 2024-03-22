@@ -7,7 +7,7 @@
 #include <vector>
 
 
-std::vector<bool> convertStates(uint8_t digit) {
+std::vector<bool> convertStates(short digit) {
   switch (digit) {
     case (1):
       return {0,0,1,0,0,1,0};
@@ -44,7 +44,7 @@ std::vector<bool> convertStates(uint8_t digit) {
   }
 }
 
-void output(Adafruit_PWMServoDriver& board, uint8_t start, uint8_t end, std::vector<bool>& states) {
+void output(Adafruit_PWMServoDriver& board, uint8_t start, uint8_t end, std::vector<bool> states) {
   for (uint8_t i = start, j = 0; i <= end; i++, j++) {
     if (states[i])
       board.setPWM(i, 4096, 0);  // flip servo to "on"
