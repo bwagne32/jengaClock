@@ -43,7 +43,7 @@ void setup(){
     delay(500);
   }
   ntp.ruleDST("EST", Last, Sun, Mar, 2, -240); // last sunday in march 2:00, timetone +120min (+1 GMT + 1h summertime offset)
-  ntp.ruleSTD("EST", Last, Sun, Oct, 3, -240); // last sunday in october 3:00, timezone +60min (+1 GMT)
+  ntp.ruleSTD("EST", Last, Sun, Oct, 3, -240-60); // last sunday in october 3:00, timezone +60min (+1 GMT)
   ntp.begin();
 
   // PWM setup
